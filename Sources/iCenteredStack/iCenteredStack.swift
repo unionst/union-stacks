@@ -8,8 +8,8 @@
 
 import SwiftUI
 
-struct iCenteredStack: Layout {
-    var spacing: CGFloat = 0
+public struct iCenteredStack: Layout {
+    public var spacing: CGFloat = 0
     
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout Void) -> CGSize {
         guard !subviews.isEmpty else { return .zero }
