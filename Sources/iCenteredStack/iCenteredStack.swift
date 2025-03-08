@@ -11,7 +11,11 @@ import SwiftUI
 public struct iCenteredStack: Layout {
     public var spacing: CGFloat = 0
     
-    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout Void) -> CGSize {
+    public init(spacing: CGFloat = 0) {
+        self.spacing = spacing
+    }
+    
+    public func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout Void) -> CGSize {
         guard !subviews.isEmpty else { return .zero }
         
         let maxHeight = subviews.map { $0.sizeThatFits(.unspecified).height }.max() ?? 0
@@ -20,7 +24,7 @@ public struct iCenteredStack: Layout {
         return CGSize(width: width, height: maxHeight)
     }
     
-    func placeSubviews(
+    public func placeSubviews(
         in bounds: CGRect,
         proposal: ProposedViewSize,
         subviews: Subviews,
