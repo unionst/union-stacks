@@ -33,42 +33,57 @@ public struct iCenteredStack: Layout {
         guard !subviews.isEmpty else { return }
         
         let centerIndex = subviews.count / 2
-        let totalSpacing = spacing * CGFloat(subviews.count - 1)
         
         let centerSize = subviews[centerIndex].sizeThatFits(.unspecified)
         let centerX = bounds.midX - centerSize.width / 2
         
-        let sideItemsSpace = bounds.width - centerSize.width - totalSpacing
-        let spacePerSide = sideItemsSpace / 2
+        let leftSideWidth = (bounds.width - centerSize.width) / 2 - spacing
+        let rightSideWidth = leftSideWidth
         
-        var xPosition = bounds.minX
+        subviews[centerIndex].place(
+            at: CGPoint(x: centerX, y: bounds.midY - centerSize.height / 2),
+            anchor: .topLeading,
+            proposal: ProposedViewSize(width: centerSize.width, height: centerSize.height)
+        )
         
-        for (index, subview) in subviews.enumerated() {
-            let subviewSize: CGSize
+        let leftItems = subviews.prefix(centerIndex)
+        if !leftItems.isEmpty {
+            let widthPerLeftItem = leftSideWidth / CGFloat(leftItems.count)
             
-            if index == centerIndex {
-                subviewSize = centerSize
-                xPosition = centerX
-            } else if index < centerIndex {
-                let availableWidth = spacePerSide / CGFloat(centerIndex)
-                subviewSize = subview
-                    .sizeThatFits(ProposedViewSize(width: availableWidth, height: bounds.height))
-            } else {
-                let availableWidth = spacePerSide / CGFloat(subviews.count - centerIndex - 1)
-                subviewSize = subview
-                    .sizeThatFits(ProposedViewSize(width: availableWidth, height: bounds.height))
+            var leftXPosition = bounds.minX
+            for (i, subview) in leftItems.enumerated() {
+                let subviewSize = subview.sizeThatFits(ProposedViewSize(width: widthPerLeftItem, height: bounds.height))
+                let yPosition = bounds.midY - subviewSize.height / 2
+                
+                subview.place(
+                    at: CGPoint(x: leftXPosition, y: yPosition),
+                    anchor: .topLeading,
+                    proposal: ProposedViewSize(width: subviewSize.width, height: subviewSize.height)
+                )
+                
+                leftXPosition += subviewSize.width + spacing
             }
+        }
+        
+        let rightItems = subviews.suffix(subviews.count - centerIndex - 1)
+        if !rightItems.isEmpty {
+            let widthPerRightItem = rightSideWidth / CGFloat(rightItems.count)
             
-            let yPosition = bounds.midY - subviewSize.height / 2
-            let point = CGPoint(x: xPosition, y: yPosition)
-            
-            subview.place(
-                at: point,
-                anchor: .topLeading,
-                proposal: ProposedViewSize(width: subviewSize.width, height: subviewSize.height)
-            )
-            
-            xPosition += subviewSize.width + spacing
+            var rightXPosition = bounds.maxX
+            for (i, subview) in rightItems.enumerated().reversed() {
+                let subviewSize = subview.sizeThatFits(ProposedViewSize(width: widthPerRightItem, height: bounds.height))
+                let yPosition = bounds.midY - subviewSize.height / 2
+                
+                rightXPosition -= subviewSize.width
+                
+                subview.place(
+                    at: CGPoint(x: rightXPosition, y: yPosition),
+                    anchor: .topLeading,
+                    proposal: ProposedViewSize(width: subviewSize.width, height: subviewSize.height)
+                )
+                
+                rightXPosition -= spacing
+            }
         }
     }
 }
