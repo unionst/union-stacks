@@ -3,7 +3,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "iCenteredStack",
+    name: "union-stacks",
     platforms: [
         .iOS(.v16),
         .macOS(.v13),
@@ -12,13 +12,13 @@ let package = Package(
     ],
     products: [
         .library(
-            name: "iCenteredStack",
-            targets: ["iCenteredStack"]
+            name: "UnionStacks",
+            targets: ["UnionStacks"]
         ),
     ],
     targets: [
         .target(
-            name: "iCenteredStack"
+            name: "UnionStacks"
         ),
     ]
 )

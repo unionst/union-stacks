@@ -1,14 +1,13 @@
 //
-//  iCenteredStack.swift
-//  iCenteredStack
+//  CStack.swift
+//  union-stacks
 //
-//  Created by Benjamin Sage on 3/8/25.
-//  Requires iOS 16+, macOS 13+, tvOS 16+, watchOS 9+
+//  Created by Ben Sage on 3/8/25.
 //
 
 import SwiftUI
 
-public struct iCenteredStack: Layout {
+public struct CStack: Layout {
     public var spacing: CGFloat = 0
     
     public init(spacing: CGFloat = 0) {
@@ -90,7 +89,7 @@ public struct iCenteredStack: Layout {
 
 #Preview {
     VStack(spacing: 20) {
-        iCenteredStack(spacing: 0) {
+        CStack(spacing: 0) {
             Text("Short")
                 .padding(.horizontal, 10)
                 .background(Color.red.opacity(0.3))
@@ -105,7 +104,7 @@ public struct iCenteredStack: Layout {
         }
         .border(Color.gray)
 
-        iCenteredStack(spacing: 10) {
+        CStack(spacing: 10) {
             Text("Left with a lot more content")
                 .padding(.horizontal, 10)
                 .background(Color.purple.opacity(0.3))
