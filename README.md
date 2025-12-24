@@ -3,7 +3,7 @@
 > **Production-ready SwiftUI layout components for wrapping, flowing, and centering content**
 
 [![Swift 6.0](https://img.shields.io/badge/Swift-6.0-orange.svg)](https://swift.org)
-[![iOS 17+](https://img.shields.io/badge/iOS-17+-blue.svg)](https://developer.apple.com/ios/)
+[![iOS 16+](https://img.shields.io/badge/iOS-16+-blue.svg)](https://developer.apple.com/ios/)
 [![SwiftUI](https://img.shields.io/badge/SwiftUI-Layout-green.svg)](https://developer.apple.com/xcode/swiftui/)
 [![License](https://img.shields.io/badge/License-MIT-lightgrey.svg)](LICENSE)
 [![SPM](https://img.shields.io/badge/SPM-compatible-brightgreen.svg)](https://swift.org/package-manager/)
@@ -293,7 +293,7 @@ Use stable identifiers and consider `.drawingGroup()` for complex child views.
 
 ## 🛠 Requirements
 
-- iOS 17.0+ / macOS 14.0+ / tvOS 17.0+ / watchOS 10.0+
+- iOS 16.0+ / macOS 13.0+ / tvOS 16.0+ / watchOS 9.0+
 - Swift 6.0+
 - Xcode 16.0+
 
@@ -321,7 +321,7 @@ Built with ❤️ by [Ben Sage](https://github.com/bensage)
 
 ## 🔍 Keywords
 
-SwiftUI, Layout, Custom Layout, Flow Layout, Wrapping Stack, Wrapped HStack, Tag Layout, Chip Layout, iOS Development, Swift Package, SwiftUI Components, Responsive Layout, Dynamic Layout, Auto-wrapping, Horizontal Stack, Centered Layout, Navigation Bar Layout, SwiftUI Layout Protocol, iOS 17, Modern SwiftUI
+SwiftUI, Layout, Custom Layout, Flow Layout, Wrapping Stack, Wrapped HStack, Tag Layout, Chip Layout, iOS Development, Swift Package, SwiftUI Components, Responsive Layout, Dynamic Layout, Auto-wrapping, Horizontal Stack, Centered Layout, Navigation Bar Layout, SwiftUI Layout Protocol, iOS 16, Modern SwiftUI
 
 ---
 

@@ -6,10 +6,10 @@ Master advanced techniques for building dynamic, interactive layouts with Wrappi
     @PageKind(article)
     @PageColor(purple)
     @CallToAction(purpose: link, url: "https://github.com/unionst/union-stacks")
-    @Available(iOS, introduced: "17.0")
-    @Available(macOS, introduced: "14.0")
-    @Available(tvOS, introduced: "17.0")
-    @Available(watchOS, introduced: "10.0")
+    @Available(iOS, introduced: "16.0")
+    @Available(macOS, introduced: "13.0")
+    @Available(tvOS, introduced: "16.0")
+    @Available(watchOS, introduced: "9.0")
 }
 
 ## Overview

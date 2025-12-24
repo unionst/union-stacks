@@ -37,7 +37,7 @@ Thank you for your interest in contributing to UnionStacks! This document provid
 
 ### SwiftUI Conventions
 
-- Use modern SwiftUI APIs (iOS 17+)
+- Use modern SwiftUI APIs (iOS 16+)
 - Prefer async/await over completion handlers
 - Use `@Observable` instead of `ObservableObject`
 - Use `#Preview` instead of `PreviewProvider`

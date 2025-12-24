@@ -21,7 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `CStack` - Centered layout with balanced distribution
 - Customizable horizontal and vertical spacing
 - Full SwiftUI Layout protocol implementation
-- iOS 17+, macOS 14+, tvOS 17+, watchOS 10+ support
+- iOS 16+, macOS 13+, tvOS 16+, watchOS 9+ support
 - Swift 6 language mode support
 - Complete inline documentation
 - Swift Package Manager support

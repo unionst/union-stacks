@@ -7,10 +7,10 @@ Create flowing, responsive layouts that adapt to any screen size.
     @PageKind(article)
     @PageColor(blue)
     @CallToAction(purpose: link, url: "https://github.com/unionst/union-stacks")
-    @Available(iOS, introduced: "17.0")
-    @Available(macOS, introduced: "14.0")
-    @Available(tvOS, introduced: "17.0")
-    @Available(watchOS, introduced: "10.0")
+    @Available(iOS, introduced: "16.0")
+    @Available(macOS, introduced: "13.0")
+    @Available(tvOS, introduced: "16.0")
+    @Available(watchOS, introduced: "9.0")
 }
 
 ## Overview
@@ -34,7 +34,7 @@ import SwiftUI
 import UnionStacks
 ```
 
-**Requirements:** iOS 17.0+, macOS 14.0+, tvOS 17.0+, watchOS 10.0+
+**Requirements:** iOS 16.0+, macOS 13.0+, tvOS 16.0+, watchOS 9.0+
 
 ## Basic Example: Tag Collection
 
@@ -378,7 +378,7 @@ WrappingHStack { }
 
 ## Keywords
 
-SwiftUI wrapping stack, flow layout, auto-wrap, horizontal stack wrap, tag layout, chip layout, CSS flexbox wrap SwiftUI, UICollectionView flow layout SwiftUI, wrapped horizontal stack, dynamic tag collection, filter chips SwiftUI, custom layout protocol, iOS 17 layout
+SwiftUI wrapping stack, flow layout, auto-wrap, horizontal stack wrap, tag layout, chip layout, CSS flexbox wrap SwiftUI, UICollectionView flow layout SwiftUI, wrapped horizontal stack, dynamic tag collection, filter chips SwiftUI, custom layout protocol, iOS 16 layout
 
 ## See Also
 

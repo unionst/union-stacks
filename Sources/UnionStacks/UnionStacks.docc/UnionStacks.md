@@ -16,7 +16,7 @@ UnionStacks provides two powerful `Layout` implementations that solve common UI 
 - ``WrappingHStack`` - Auto-wrapping horizontal flow layout for tags, chips, and dynamic collections
 - ``CStack`` - Centered layout with balanced left/right distribution for navigation bars and toolbars
 
-These layouts integrate seamlessly with SwiftUI's layout system, work with any SwiftUI views as children, and target iOS 17+ with modern Swift concurrency support.
+These layouts integrate seamlessly with SwiftUI's layout system, work with any SwiftUI views as children, and target iOS 16+ with modern Swift concurrency support.
 
 ### Key Features
 
