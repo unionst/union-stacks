@@ -635,6 +635,362 @@ struct PaginatedTagsView: View {
 }
 ```
 
+## Layout Control Patterns
+
+### Sectioned Layouts with `.breakAfter()`
+
+Create visually separated sections within a flowing layout:
+
+```swift
+struct ProjectTagsView: View {
+    let project: Project
+    
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                Text(project.name)
+                    .font(.title.bold())
+                
+                WrappingHStack(horizontalSpacing: 10, verticalSpacing: 12) {
+                    if !project.languages.isEmpty {
+                        Text("Languages")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.secondary)
+                            .breakAfter()
+                        
+                        ForEach(project.languages, id: \.self) { lang in
+                            LanguageTag(name: lang)
+                        }
+                        
+                        if !project.frameworks.isEmpty {
+                            Spacer()
+                                .frame(width: 0)
+                                .breakAfter()
+                        }
+                    }
+                    
+                    if !project.frameworks.isEmpty {
+                        Text("Frameworks")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.secondary)
+                            .breakAfter()
+                        
+                        ForEach(project.frameworks, id: \.self) { framework in
+                            FrameworkTag(name: framework)
+                        }
+                        
+                        if !project.topics.isEmpty {
+                            Spacer()
+                                .frame(width: 0)
+                                .breakAfter()
+                        }
+                    }
+                    
+                    if !project.topics.isEmpty {
+                        Text("Topics")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.secondary)
+                            .breakAfter()
+                        
+                        ForEach(project.topics, id: \.self) { topic in
+                            TopicTag(name: topic)
+                        }
+                    }
+                }
+            }
+            .padding()
+        }
+    }
+}
+
+struct Project {
+    let name: String
+    let languages: [String]
+    let frameworks: [String]
+    let topics: [String]
+}
+
+struct LanguageTag: View {
+    let name: String
+    
+    var body: some View {
+        Text(name)
+            .font(.subheadline)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .background(Color.blue.opacity(0.2))
+            .clipShape(Capsule())
+    }
+}
+
+struct FrameworkTag: View {
+    let name: String
+    
+    var body: some View {
+        Text(name)
+            .font(.subheadline)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .background(Color.purple.opacity(0.2))
+            .clipShape(Capsule())
+    }
+}
+
+struct TopicTag: View {
+    let name: String
+    
+    var body: some View {
+        Text(name)
+            .font(.subheadline)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .background(Color.green.opacity(0.2))
+            .clipShape(Capsule())
+    }
+}
+
+#Preview {
+    ProjectTagsView(project: Project(
+        name: "UnionStacks",
+        languages: ["Swift"],
+        frameworks: ["SwiftUI", "UIKit"],
+        topics: ["Layout", "iOS", "macOS"]
+    ))
+}
+```
+
+### Expandable Lists with `maxRows`
+
+Build collapsible tag lists that expand on demand:
+
+```swift
+struct ExpandableTagListView: View {
+    let allTags: [String]
+    @State private var isExpanded = false
+    
+    private let previewRows = 2
+    
+    var displayedTags: [String] {
+        isExpanded ? allTags : Array(allTags.prefix(10))
+    }
+    
+    var hiddenCount: Int {
+        max(0, allTags.count - 10)
+    }
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            WrappingHStack(
+                horizontalSpacing: 8,
+                verticalSpacing: 8,
+                maxRows: isExpanded ? nil : previewRows
+            ) {
+                ForEach(displayedTags, id: \.self) { tag in
+                    Text(tag)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(Color.blue.opacity(0.2))
+                        .clipShape(Capsule())
+                        .transition(.scale.combined(with: .opacity))
+                }
+            }
+            .animation(.spring(response: 0.4, dampingFraction: 0.75), value: isExpanded)
+            
+            if !isExpanded && hiddenCount > 0 {
+                Button {
+                    withAnimation {
+                        isExpanded = true
+                    }
+                } label: {
+                    HStack(spacing: 4) {
+                        Text("+\(hiddenCount) more")
+                            .font(.subheadline.weight(.medium))
+                        Image(systemName: "chevron.down")
+                            .imageScale(.small)
+                    }
+                    .foregroundStyle(.blue)
+                }
+                .buttonStyle(.plain)
+            } else if isExpanded {
+                Button {
+                    withAnimation {
+                        isExpanded = false
+                    }
+                } label: {
+                    HStack(spacing: 4) {
+                        Text("Show less")
+                            .font(.subheadline.weight(.medium))
+                        Image(systemName: "chevron.up")
+                            .imageScale(.small)
+                    }
+                    .foregroundStyle(.blue)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+}
+
+#Preview {
+    ExpandableTagListView(
+        allTags: ["SwiftUI", "iOS", "Development", "Layout", "Tags", "Wrapping",
+                  "Custom", "Component", "Design", "System", "Pattern", "Advanced",
+                  "Guide", "Tutorial", "Example", "Code", "Sample"]
+    )
+    .padding()
+}
+```
+
+### Smart Grouping with Dynamic Breaks
+
+Automatically group items with breaks based on data:
+
+```swift
+struct SmartGroupedTagsView: View {
+    let tagGroups: [(category: String, tags: [String])]
+    
+    var body: some View {
+        ScrollView {
+            WrappingHStack(horizontalSpacing: 8, verticalSpacing: 12) {
+                ForEach(Array(tagGroups.enumerated()), id: \.offset) { index, group in
+                    Text(group.category)
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                        .textCase(.uppercase)
+                        .breakAfter()
+                    
+                    ForEach(Array(group.tags.enumerated()), id: \.offset) { tagIndex, tag in
+                        TagView(text: tag, color: colorForCategory(group.category))
+                            .breakAfter(when: tagIndex == group.tags.count - 1 && index < tagGroups.count - 1)
+                    }
+                }
+            }
+            .padding()
+        }
+    }
+    
+    func colorForCategory(_ category: String) -> Color {
+        switch category {
+        case "High Priority": return .red
+        case "Medium Priority": return .orange
+        case "Low Priority": return .blue
+        default: return .gray
+        }
+    }
+}
+
+struct TagView: View {
+    let text: String
+    let color: Color
+    
+    var body: some View {
+        Text(text)
+            .font(.subheadline)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .background(color.opacity(0.2))
+            .clipShape(Capsule())
+    }
+}
+
+extension View {
+    func breakAfter(when condition: Bool) -> some View {
+        if condition {
+            self.breakAfter()
+        } else {
+            self
+        }
+    }
+}
+
+#Preview {
+    SmartGroupedTagsView(tagGroups: [
+        (category: "High Priority", tags: ["Bug Fix", "Security", "Critical"]),
+        (category: "Medium Priority", tags: ["Feature", "Enhancement", "Refactor"]),
+        (category: "Low Priority", tags: ["Documentation", "Cleanup", "Style"])
+    ])
+}
+```
+
+### Carousel-Style Tag Browser
+
+Create a paginated tag browser using `maxRows`:
+
+```swift
+struct TagCarouselView: View {
+    let allTags: [String]
+    @State private var currentPage = 0
+    
+    private let rowsPerPage = 3
+    private let tagsPerRow = 4
+    private var tagsPerPage: Int { rowsPerPage * tagsPerRow }
+    
+    private var totalPages: Int {
+        Int(ceil(Double(allTags.count) / Double(tagsPerPage)))
+    }
+    
+    private var currentPageTags: [String] {
+        let start = currentPage * tagsPerPage
+        let end = min(start + tagsPerPage, allTags.count)
+        return Array(allTags[start..<end])
+    }
+    
+    var body: some View {
+        VStack(spacing: 16) {
+            WrappingHStack(
+                horizontalSpacing: 10,
+                verticalSpacing: 10,
+                maxRows: rowsPerPage
+            ) {
+                ForEach(currentPageTags, id: \.self) { tag in
+                    Button(tag) {
+                        selectTag(tag)
+                    }
+                    .buttonStyle(.bordered)
+                }
+            }
+            .frame(height: 150)
+            .animation(.spring(response: 0.4), value: currentPage)
+            
+            HStack(spacing: 20) {
+                Button {
+                    withAnimation {
+                        currentPage = max(0, currentPage - 1)
+                    }
+                } label: {
+                    Image(systemName: "chevron.left")
+                        .imageScale(.large)
+                }
+                .disabled(currentPage == 0)
+                
+                Text("Page \(currentPage + 1) of \(totalPages)")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                
+                Button {
+                    withAnimation {
+                        currentPage = min(totalPages - 1, currentPage + 1)
+                    }
+                } label: {
+                    Image(systemName: "chevron.right")
+                        .imageScale(.large)
+                }
+                .disabled(currentPage >= totalPages - 1)
+            }
+        }
+        .padding()
+    }
+    
+    func selectTag(_ tag: String) {
+        print("Selected: \(tag)")
+    }
+}
+
+#Preview {
+    TagCarouselView(allTags: Array(1...50).map { "Tag \($0)" })
+}
+```
+
 ## Best Practices Summary
 
 ### Do's ✅
