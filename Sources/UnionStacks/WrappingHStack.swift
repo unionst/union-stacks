@@ -7,14 +7,143 @@
 
 import SwiftUI
 
-/// A layout that arranges children horizontally and wraps to new rows when space runs out.
+private struct BreakAfterKey: LayoutValueKey {
+    static let defaultValue: Bool = false
+}
+
+extension View {
+    /// Forces a line break after this view when used inside a `WrappingHStack`.
+    ///
+    /// Use `breakAfter()` to guarantee that the next view in a `WrappingHStack` starts on a new row,
+    /// regardless of available horizontal space. This is useful for creating visual sections, grouping
+    /// related items, or ensuring specific layout structure.
+    ///
+    /// The view with `breakAfter()` remains on its current row and takes up space normally. The next
+    /// view in the layout sequence will begin a new row, even if there's room on the current row.
+    ///
+    /// ## Basic Usage
+    ///
+    /// ```swift
+    /// WrappingHStack {
+    ///     Text("First")
+    ///     Text("Second")
+    ///         .breakAfter()
+    ///     Text("Third")
+    /// }
+    /// ```
+    ///
+    /// This creates two rows:
+    /// - Row 1: "First", "Second"
+    /// - Row 2: "Third"
+    ///
+    /// ## Common Patterns
+    ///
+    /// **Section headers:**
+    ///
+    /// ```swift
+    /// WrappingHStack {
+    ///     Text("Fruits")
+    ///         .font(.headline)
+    ///         .breakAfter()
+    ///     
+    ///     Text("Apple")
+    ///     Text("Banana")
+    ///     Text("Cherry")
+    ///         .breakAfter()
+    ///     
+    ///     Text("Vegetables")
+    ///         .font(.headline)
+    ///         .breakAfter()
+    ///     
+    ///     Text("Carrot")
+    ///     Text("Lettuce")
+    /// }
+    /// ```
+    ///
+    /// **Logical groupings:**
+    ///
+    /// ```swift
+    /// WrappingHStack {
+    ///     ForEach(items) { item in
+    ///         TagView(item)
+    ///             .breakAfter(when: item.isLastInGroup)
+    ///     }
+    /// }
+    ///
+    /// extension View {
+    ///     func breakAfter(when condition: Bool) -> some View {
+    ///         if condition {
+    ///             self.breakAfter()
+    ///         } else {
+    ///             self
+    ///         }
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// **Responsive separators:**
+    ///
+    /// ```swift
+    /// WrappingHStack {
+    ///     Text("Action 1")
+    ///     Text("Action 2")
+    ///     Text("Action 3")
+    ///         .breakAfter()
+    ///     
+    ///     Text("Help")
+    ///     Text("Settings")
+    /// }
+    /// ```
+    ///
+    /// ## Important Notes
+    ///
+    /// - **No effect outside WrappingHStack:** This modifier only affects layout within `WrappingHStack`.
+    ///   Other layouts ignore it.
+    /// - **Works with natural wrapping:** If the view would naturally wrap (due to width constraints),
+    ///   the break still occurs. This modifier doesn't prevent normal wrapping behavior.
+    /// - **Applies after the view:** The break happens *after* this view, not before. The next view
+    ///   starts the new row.
+    /// - **Performance:** Has negligible performance impact - only a boolean check during layout.
+    ///
+    /// ## When to Use
+    ///
+    /// Use `breakAfter()` when you need:
+    /// - Semantic sections within a flowing layout
+    /// - Guaranteed visual separation between groups
+    /// - Control over layout structure while maintaining responsive wrapping
+    /// - Headers or labels that should be followed by wrapped content
+    ///
+    /// **Don't use** when:
+    /// - You need consistent grid columns (use `LazyVGrid` instead)
+    /// - Every item should break (just use `VStack`)
+    /// - You want full manual control over every row (use explicit `HStack`s in a `VStack`)
+    ///
+    /// - Returns: A view that signals to `WrappingHStack` to start a new row after this view.
+    public func breakAfter() -> some View {
+        layoutValue(key: BreakAfterKey.self, value: true)
+    }
+}
+
+/// A layout that arranges children horizontally and wraps to new rows when space runs out, like text flowing in a paragraph.
 ///
 /// `WrappingHStack` flows children left-to-right like an `HStack`, but automatically wraps
 /// to the next row when adding another child would exceed the available width. Each row's
-/// height is determined by its tallest child.
+/// height is determined by its tallest child, creating a natural flow layout.
+///
+/// **Use WrappingHStack when you have:**
+/// - Variable-length collections (tags, chips, categories)
+/// - Content that needs to adapt to different screen widths
+/// - Items that should flow naturally like text
+/// - Dynamic content where item count isn't fixed
+///
+/// **Don't use WrappingHStack when you need:**
+/// - Grid alignment with columns (use `LazyVGrid` instead)
+/// - Large collections with 100+ items (use `LazyVGrid` for better performance)
+/// - Single-row layouts (use `HStack` instead)
 ///
 /// This creates a "flow layout" behavior similar to CSS flexbox with `flex-wrap: wrap` or
-/// text flowing across lines in a paragraph.
+/// text flowing across lines in a paragraph. The layout is responsive and automatically
+/// adapts to different screen sizes and orientations.
 ///
 /// ## Basic Usage
 ///
@@ -38,14 +167,19 @@ import SwiftUI
 ///
 /// ## How It Works
 ///
-/// WrappingHStack places children row by row:
-/// 1. Measures each child's ideal size
-/// 2. Adds children to the current row until adding another would exceed the width
-/// 3. Starts a new row and continues placing remaining children
-/// 4. Each row's height is the maximum height of its children
+/// WrappingHStack uses a greedy wrapping algorithm:
+/// 1. **Measures** each child's ideal size (width and height)
+/// 2. **Places** children left-to-right on the current row
+/// 3. **Wraps** to a new row when the next child would exceed available width
+/// 4. **Heights** each row based on its tallest child
+/// 5. **Spaces** items with horizontal spacing within rows and vertical spacing between rows
 ///
-/// Children are always placed at their ideal size - WrappingHStack doesn't stretch or
-/// compress children to fit.
+/// **Important:** Children are always placed at their ideal size. WrappingHStack doesn't stretch,
+/// compress, or truncate children. If a single child is wider than the available width,
+/// it's placed on its own row at full width (potentially overflowing).
+///
+/// The layout algorithm runs in O(n) time where n is the number of children, making it
+/// efficient for typical UI scenarios with dozens of items.
 ///
 /// ## Common Patterns
 ///
@@ -65,6 +199,35 @@ import SwiftUI
 ///             }
 ///         }
 ///         .padding()
+///     }
+/// }
+/// ```
+///
+/// **Forcing line breaks with `breakAfter()`:**
+///
+/// Use the `breakAfter()` modifier on any child to force a new line after that element,
+/// regardless of available horizontal space:
+///
+/// ```swift
+/// struct SectionedTags: View {
+///     var body: some View {
+///         WrappingHStack {
+///             Text("Section 1")
+///                 .font(.headline)
+///                 .breakAfter()
+///             
+///             Text("Tag A")
+///             Text("Tag B")
+///             Text("Tag C")
+///                 .breakAfter()
+///             
+///             Text("Section 2")
+///                 .font(.headline)
+///                 .breakAfter()
+///             
+///             Text("Tag D")
+///             Text("Tag E")
+///         }
 ///     }
 /// }
 /// ```
@@ -89,17 +252,44 @@ import SwiftUI
 /// }
 /// ```
 ///
-/// **When to use WrappingHStack vs HStack:**
+/// **When to use WrappingHStack vs alternatives:**
 ///
-/// | Layout | Behavior | Best For |
-/// |--------|----------|----------|
-/// | `WrappingHStack` | Wraps to multiple rows when needed | Tags, chips, variable-length collections |
-/// | `HStack` | Single row, may truncate or overflow | Fixed content, navigation bars |
-/// | `LazyVGrid` | Grid with explicit columns | Uniform items, photo grids |
+/// | Layout | Wrapping | Item Sizing | Alignment | Best For |
+/// |--------|----------|-------------|-----------|----------|
+/// | `WrappingHStack` | ✅ Automatic | Ideal size | Left-aligned rows | Tags, chips, keywords, dynamic content |
+/// | `HStack` | ❌ Single row | May compress | Flexible | Fixed content, navigation bars, toolbars |
+/// | `LazyVGrid` | ✅ Column-based | Grid cells | Vertical columns | Photo grids, uniform items, large collections |
+/// | `FlowLayout` (Swift 6+) | ✅ Native | Ideal size | Configurable | When available, use Apple's native implementation |
 ///
-/// **Important:** WrappingHStack always takes the full proposed width. Children wrap based
-/// on this width, not on their container's current size. If you need responsive wrapping
-/// in a narrower container, ensure the parent properly constrains the width.
+/// **WrappingHStack shines when:**
+/// - Items have different widths (like text tags)
+/// - You want natural text-like flow
+/// - Collection size is small to medium (1-100 items)
+/// - Content is dynamically generated
+///
+/// **Choose LazyVGrid when:**
+/// - Items should align vertically in columns
+/// - You have 100+ items (lazy loading helps performance)
+/// - Items are uniform in size
+/// - You need explicit column control
+///
+/// **Performance note:** WrappingHStack computes layout for all children upfront.
+/// For very large collections (100+ items), consider using `LazyVGrid` with adaptive
+/// columns for better performance through lazy loading.
+///
+/// **Important:** WrappingHStack always takes the full proposed width from its parent.
+/// Children wrap based on this width, not on their container's current size. If you need
+/// responsive wrapping, ensure the parent properly constrains the width:
+///
+/// ```swift
+/// WrappingHStack {
+///     ForEach(tags, id: \.self) { tag in
+///         Text(tag)
+///     }
+/// }
+/// .frame(maxWidth: .infinity)
+/// .padding()
+/// ```
 public struct WrappingHStack: Layout {
     
     /// The horizontal spacing between adjacent children within a row.
@@ -134,14 +324,24 @@ public struct WrappingHStack: Layout {
     /// Setting to `0` stacks rows directly adjacent vertically.
     public var verticalSpacing: CGFloat
     
-    /// Creates a WrappingHStack with the specified spacing.
-    ///
-    /// Both spacing values default to `8` points, matching typical UI spacing conventions.
-    /// Adjust these to create tighter or looser layouts.
-    ///
-    /// - Parameters:
-    ///   - horizontalSpacing: The spacing between children within a row. Defaults to `8`.
-    ///   - verticalSpacing: The spacing between rows. Defaults to `8`.
+/// Creates a WrappingHStack with the specified spacing between items and rows.
+///
+/// **Both spacing values default to `8` points**, matching typical UI spacing conventions
+/// and Apple's Human Interface Guidelines for comfortable touch targets and visual separation.
+///
+/// **Choosing spacing values:**
+/// - **Compact layouts** (4-6 points): For dense tag collections or limited space
+/// - **Standard layouts** (8-12 points): Most use cases, good balance of density and readability  
+/// - **Spacious layouts** (16-20 points): For prominent content or accessibility needs
+/// - **Zero spacing** (0 points): For tiled layouts or custom spacing in child views
+///
+/// The spacing is applied consistently between all adjacent items, creating a uniform
+/// visual rhythm across rows. Row heights adjust automatically to accommodate the
+/// tallest item in each row.
+///
+/// - Parameters:
+///   - horizontalSpacing: The spacing between children within a row. Defaults to `8`.
+///   - verticalSpacing: The spacing between rows. Defaults to `8`.
     ///
     /// ```swift
     /// struct CompactTagsView: View {
@@ -254,11 +454,25 @@ public struct WrappingHStack: Layout {
                 currentRow.append(index)
                 currentWidth = requiredWidth
                 currentHeight = max(currentHeight, size.height)
+                
+                if subview[BreakAfterKey.self] {
+                    rows.append((indices: currentRow, height: currentHeight))
+                    currentRow = []
+                    currentWidth = 0
+                    currentHeight = 0
+                }
             } else {
                 rows.append((indices: currentRow, height: currentHeight))
                 currentRow = [index]
                 currentWidth = size.width
                 currentHeight = size.height
+                
+                if subview[BreakAfterKey.self] {
+                    rows.append((indices: currentRow, height: currentHeight))
+                    currentRow = []
+                    currentWidth = 0
+                    currentHeight = 0
+                }
             }
         }
         

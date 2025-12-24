@@ -209,7 +209,7 @@ public struct CStack: Layout {
             let widthPerLeftItem = leftSideWidth / CGFloat(leftItems.count)
             
             var leftXPosition = bounds.minX
-            for (i, subview) in leftItems.enumerated() {
+            for subview in leftItems {
                 let subviewSize = subview.sizeThatFits(ProposedViewSize(width: widthPerLeftItem, height: bounds.height))
                 let yPosition = bounds.midY - subviewSize.height / 2
                 
@@ -228,7 +228,7 @@ public struct CStack: Layout {
             let widthPerRightItem = rightSideWidth / CGFloat(rightItems.count)
             
             var rightXPosition = bounds.maxX
-            for (i, subview) in rightItems.enumerated().reversed() {
+            for subview in rightItems.reversed() {
                 let subviewSize = subview.sizeThatFits(ProposedViewSize(width: widthPerRightItem, height: bounds.height))
                 let yPosition = bounds.midY - subviewSize.height / 2
                 

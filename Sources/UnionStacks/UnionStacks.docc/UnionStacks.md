@@ -1,15 +1,30 @@
 # ``UnionStacks``
 
-Custom SwiftUI layout containers for advanced horizontal arrangements.
+Production-ready SwiftUI layout containers for creating flexible, wrapping, and centered horizontal arrangements.
+
+@Metadata {
+    @DisplayName("Union Stacks")
+    @TitleHeading("SwiftUI Layout Components")
+}
 
 ## Overview
 
-UnionStacks provides two specialized `Layout` implementations that solve common UI patterns not covered by SwiftUI's built-in stack views:
+UnionStacks provides two powerful `Layout` implementations that solve common UI patterns not covered by SwiftUI's built-in stack views. Whether you need content that wraps like text or perfectly centered navigation bars, UnionStacks has you covered.
 
-- ``CStack`` - Centers a middle child and distributes remaining children equally on left and right sides
-- ``WrappingHStack`` - Flows children horizontally and wraps to new rows when space runs out
+### Available Layouts
 
-These layouts integrate seamlessly with SwiftUI's layout system and work with any SwiftUI views as children.
+- ``WrappingHStack`` - Auto-wrapping horizontal flow layout for tags, chips, and dynamic collections
+- ``CStack`` - Centered layout with balanced left/right distribution for navigation bars and toolbars
+
+These layouts integrate seamlessly with SwiftUI's layout system, work with any SwiftUI views as children, and target iOS 17+ with modern Swift concurrency support.
+
+### Key Features
+
+- **🎯 Automatic wrapping** - Content flows naturally and wraps to new rows when space runs out
+- **⚖️ Perfect centering** - Guaranteed center alignment for navigation bar titles
+- **📱 Responsive** - Adapts to different screen sizes and orientations
+- **⚡️ Performant** - Efficient layout calculations suitable for typical UI scenarios
+- **🔧 Customizable** - Flexible spacing and configuration options
 
 ## Quick Start
 
@@ -243,8 +258,38 @@ WrappingHStack { }
 
 ## Topics
 
+### Getting Started
+
+- <doc:BuildingWrappingHStack>
+
 ### Layouts
 
-- ``CStack``
 - ``WrappingHStack``
+- ``CStack``
+
+### Guides and Tutorials
+
+- <doc:BuildingWrappingHStack>
+- <doc:AdvancedWrappingPatterns>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
