@@ -60,23 +60,13 @@ extension View {
     /// }
     /// ```
     ///
-    /// **Logical groupings:**
+    /// **Conditional breaks:**
     ///
     /// ```swift
     /// WrappingHStack {
     ///     ForEach(items) { item in
     ///         TagView(item)
-    ///             .breakAfter(when: item.isLastInGroup)
-    ///     }
-    /// }
-    ///
-    /// extension View {
-    ///     func breakAfter(when condition: Bool) -> some View {
-    ///         if condition {
-    ///             self.breakAfter()
-    ///         } else {
-    ///             self
-    ///         }
+    ///             .breakAfter(item.isLastInGroup)
     ///     }
     /// }
     /// ```
@@ -121,6 +111,41 @@ extension View {
     /// - Returns: A view that signals to `WrappingHStack` to start a new row after this view.
     public func breakAfter() -> some View {
         layoutValue(key: BreakAfterKey.self, value: true)
+    }
+    
+    /// Conditionally forces a line break after this view when used inside a `WrappingHStack`.
+    ///
+    /// Use this variant when you need to conditionally apply line breaks based on data or state.
+    /// Similar to SwiftUI modifiers like `.disabled(_:)`, this allows you to toggle the break
+    /// behavior dynamically.
+    ///
+    /// ## Usage
+    ///
+    /// ```swift
+    /// WrappingHStack {
+    ///     ForEach(items) { item in
+    ///         ItemView(item)
+    ///             .breakAfter(item.isLastInSection)
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```swift
+    /// WrappingHStack {
+    ///     ForEach(metadata) { item in
+    ///         HStack {
+    ///             Image(systemName: item.icon)
+    ///             Text(item.text)
+    ///         }
+    ///         .breakAfter(item.icon == "clock.fill")
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// - Parameter condition: When `true`, forces a line break after this view. When `false`, allows normal wrapping behavior.
+    /// - Returns: A view that conditionally signals to `WrappingHStack` to start a new row after this view.
+    public func breakAfter(_ condition: Bool) -> some View {
+        layoutValue(key: BreakAfterKey.self, value: condition)
     }
 }
 
