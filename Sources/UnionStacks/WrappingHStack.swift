@@ -232,6 +232,37 @@ extension View {
 /// }
 /// ```
 ///
+/// **Limiting rows with `maxRows`:**
+///
+/// Set `maxRows` to limit the number of displayed rows, similar to how `.lineLimit()` works for Text:
+///
+/// ```swift
+/// struct CompactTagList: View {
+///     let tags: [String]
+///     @State private var showAll = false
+///     
+///     var body: some View {
+///         VStack(alignment: .leading) {
+///             WrappingHStack(maxRows: showAll ? nil : 2) {
+///                 ForEach(tags, id: \.self) { tag in
+///                     Text(tag)
+///                         .padding(.horizontal, 12)
+///                         .padding(.vertical, 6)
+///                         .background(Color.blue.opacity(0.2))
+///                         .cornerRadius(8)
+///                 }
+///             }
+///             
+///             if !showAll {
+///                 Button("Show More") {
+///                     showAll = true
+///                 }
+///             }
+///         }
+///     }
+/// }
+/// ```
+///
 /// **Filter chips:**
 ///
 /// ```swift
@@ -324,6 +355,25 @@ public struct WrappingHStack: Layout {
     /// Setting to `0` stacks rows directly adjacent vertically.
     public var verticalSpacing: CGFloat
     
+    /// The maximum number of rows to display before truncating.
+    ///
+    /// When set, only the first `maxRows` rows will be displayed. Any children that would
+    /// wrap beyond this limit are hidden. Setting to `nil` (the default) allows unlimited rows.
+    ///
+    /// ```swift
+    /// WrappingHStack(maxRows: 2) {
+    ///     ForEach(manyTags, id: \.self) { tag in
+    ///         Text(tag)
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// This is particularly useful for:
+    /// - Showing a preview with "Show more" functionality
+    /// - Limiting tag displays in compact views
+    /// - Creating consistent-height containers
+    public var maxRows: Int?
+    
 /// Creates a WrappingHStack with the specified spacing between items and rows.
 ///
 /// **Both spacing values default to `8` points**, matching typical UI spacing conventions
@@ -342,6 +392,7 @@ public struct WrappingHStack: Layout {
 /// - Parameters:
 ///   - horizontalSpacing: The spacing between children within a row. Defaults to `8`.
 ///   - verticalSpacing: The spacing between rows. Defaults to `8`.
+///   - maxRows: The maximum number of rows to display. Children beyond this limit are hidden. Defaults to `nil` (unlimited).
     ///
     /// ```swift
     /// struct CompactTagsView: View {
@@ -356,9 +407,24 @@ public struct WrappingHStack: Layout {
     ///     }
     /// }
     /// ```
-    public init(horizontalSpacing: CGFloat = 8, verticalSpacing: CGFloat = 8) {
+    ///
+    /// ```swift
+    /// struct PreviewTagsView: View {
+    ///     let tags: [String]
+    ///     
+    ///     var body: some View {
+    ///         WrappingHStack(maxRows: 2) {
+    ///             ForEach(tags, id: \.self) { tag in
+    ///                 Text(tag)
+    ///             }
+    ///         }
+    ///     }
+    /// }
+    /// ```
+    public init(horizontalSpacing: CGFloat = 8, verticalSpacing: CGFloat = 8, maxRows: Int? = nil) {
         self.horizontalSpacing = horizontalSpacing
         self.verticalSpacing = verticalSpacing
+        self.maxRows = maxRows
     }
     
     /// Calculates the size that fits the proposed size.
@@ -389,7 +455,8 @@ public struct WrappingHStack: Layout {
     /// ```
     public func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
         let rows = computeRows(proposal: proposal, subviews: subviews)
-        let totalHeight = rows.reduce(0) { $0 + $1.height } + CGFloat(max(0, rows.count - 1)) * verticalSpacing
+        let limitedRows = maxRows.map { Array(rows.prefix($0)) } ?? rows
+        let totalHeight = limitedRows.reduce(0) { $0 + $1.height } + CGFloat(max(0, limitedRows.count - 1)) * verticalSpacing
         return CGSize(width: proposal.width ?? 0, height: totalHeight)
     }
     
@@ -422,9 +489,10 @@ public struct WrappingHStack: Layout {
     /// ```
     public func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
         let rows = computeRows(proposal: proposal, subviews: subviews)
+        let limitedRows = maxRows.map { Array(rows.prefix($0)) } ?? rows
         var y = bounds.minY
         
-        for row in rows {
+        for row in limitedRows {
             var x = bounds.minX
             
             for index in row.indices {
