@@ -385,6 +385,9 @@ public struct WrappingHStack: Layout {
     /// When set, only the first `maxRows` rows will be displayed. Any children that would
     /// wrap beyond this limit are hidden. Setting to `nil` (the default) allows unlimited rows.
     ///
+    /// Rows that would overflow the available vertical bounds are also skipped, similar
+    /// to how `lineLimit` works for Text.
+    ///
     /// ```swift
     /// WrappingHStack(maxRows: 2) {
     ///     ForEach(manyTags, id: \.self) { tag in
@@ -480,8 +483,7 @@ public struct WrappingHStack: Layout {
     /// ```
     public func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
         let rows = computeRows(proposal: proposal, subviews: subviews)
-        let limitedRows = maxRows.map { Array(rows.prefix($0)) } ?? rows
-        let totalHeight = limitedRows.reduce(0) { $0 + $1.height } + CGFloat(max(0, limitedRows.count - 1)) * verticalSpacing
+        let totalHeight = rows.reduce(0) { $0 + $1.height } + CGFloat(max(0, rows.count - 1)) * verticalSpacing
         return CGSize(width: proposal.width ?? 0, height: totalHeight)
     }
     
@@ -514,19 +516,18 @@ public struct WrappingHStack: Layout {
     /// ```
     public func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
         let rows = computeRows(proposal: proposal, subviews: subviews)
-        let limitedRows = maxRows.map { Array(rows.prefix($0)) } ?? rows
         var y = bounds.minY
-        
-        for row in limitedRows {
+
+        for row in rows {
             var x = bounds.minX
-            
+
             for index in row.indices {
                 let subview = subviews[index]
                 let size = subview.sizeThatFits(.unspecified)
                 subview.place(at: CGPoint(x: x, y: y), proposal: ProposedViewSize(size))
                 x += size.width + horizontalSpacing
             }
-            
+
             y += row.height + verticalSpacing
         }
     }
@@ -536,43 +537,55 @@ public struct WrappingHStack: Layout {
         var currentRow: [Int] = []
         var currentWidth: CGFloat = 0
         var currentHeight: CGFloat = 0
-        
+
         let maxWidth = proposal.width ?? .infinity
-        
+
         for (index, subview) in subviews.enumerated() {
             let size = subview.sizeThatFits(.unspecified)
             let requiredWidth = currentRow.isEmpty ? size.width : currentWidth + horizontalSpacing + size.width
-            
+            let isLastAllowedRow = maxRows.map { rows.count == $0 - 1 } ?? false
+
             if requiredWidth <= maxWidth || currentRow.isEmpty {
                 currentRow.append(index)
                 currentWidth = requiredWidth
                 currentHeight = max(currentHeight, size.height)
-                
-                if subview[BreakAfterKey.self] {
+
+                // Don't break to new row if we're on the last allowed row
+                if subview[BreakAfterKey.self] && !isLastAllowedRow {
                     rows.append((indices: currentRow, height: currentHeight))
                     currentRow = []
                     currentWidth = 0
                     currentHeight = 0
                 }
             } else {
-                rows.append((indices: currentRow, height: currentHeight))
-                currentRow = [index]
-                currentWidth = size.width
-                currentHeight = size.height
-                
-                if subview[BreakAfterKey.self] {
+                // Would need to wrap - check if we're allowed to
+                if isLastAllowedRow {
+                    // On last row, just keep adding (will clip)
+                    currentRow.append(index)
+                    currentWidth = requiredWidth
+                    currentHeight = max(currentHeight, size.height)
+                } else {
+                    // Start new row
                     rows.append((indices: currentRow, height: currentHeight))
-                    currentRow = []
-                    currentWidth = 0
-                    currentHeight = 0
+                    currentRow = [index]
+                    currentWidth = size.width
+                    currentHeight = size.height
+
+                    let nowOnLastRow = maxRows.map { rows.count == $0 - 1 } ?? false
+                    if subview[BreakAfterKey.self] && !nowOnLastRow {
+                        rows.append((indices: currentRow, height: currentHeight))
+                        currentRow = []
+                        currentWidth = 0
+                        currentHeight = 0
+                    }
                 }
             }
         }
-        
+
         if !currentRow.isEmpty {
             rows.append((indices: currentRow, height: currentHeight))
         }
-        
+
         return rows
     }
 }
